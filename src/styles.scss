@@ -1,1 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
+h1 {
+    font-family: 'poppins';
+    font-size: clamp(18px,2vw,20px);
+    font-weight: 400;
+    line-height: normal;
+}
+
+p {
+    font-family: 'poppins';
+    font-size: clamp(16px,1vw,18px);
+    font-weight: 400;
+    line-height: normal;
+}
+
+.semibold-header {
+    font-family: 'poppins';
+    font-size: clamp(18px,2vw,20px);
+    font-weight: 600;
+    line-height: normal;
+}
