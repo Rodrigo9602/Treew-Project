@@ -1,0 +1,8 @@
+<article>
+  <img [ngSrc]="item?.icon!" [alt]="item?.label" width="24" height="24"> 
+  <a
+     [routerLink]="[item?.url]"
+     [routerLinkActive]="'routeActive'">
+    {{item?.label}}    
+  </a>
+</article>

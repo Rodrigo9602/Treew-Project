@@ -1,0 +1,23 @@
+<nav class="w-full h-12 flex items-center justify-between px-2 md:px-6 py-3 border-b border-[#cbd5e1]">
+    <!--Logo-->
+    <figure class="w-[100px] h-auto">
+        <img ngSrc="/assets/images/logo.png" alt="logo-image" class="w-full object-cover" width="100" height="100" priority="true"/>
+    </figure>
+
+    <!--Routes-->
+    <section class="hidden md:flex w-auto items-center justify-center gap-2">
+        @for (item of items; track $index) {
+        <app-nav-item [item]="item" />
+        }
+    </section>
+
+    <section class="flex md:hidden">
+        <button class="w-12 flex flex-col items-center px-3 justify-center gap-1 cursor-pointer md:hidden" (click)="onSideBarOpen()"> 
+            <div class="w-full h-[2px] bg-black transition-transform rounded-full" [ngClass]="opened ? 'rotate-[45deg] translate-y-1': 'rotate-0'"></div>
+            <div class="w-full h-[2px] bg-black transition-opacity rounded-full" [ngClass]="opened ? 'opacity-0': 'opacity-100'"></div>
+            <div class="w-full h-[2px] bg-black transition-transform rounded-full" [ngClass]="opened ? 'rotate-[-45deg] translate-y-[-0.5rem]': 'rotate-0'"></div>
+        </button>
+    </section>
+
+
+</nav>
