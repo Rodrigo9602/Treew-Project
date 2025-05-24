@@ -1,4 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+
 h1 {
     font-family: 'poppins';
     font-size: clamp(18px,2vw,20px);
