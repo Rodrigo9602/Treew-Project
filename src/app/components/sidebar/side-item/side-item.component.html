@@ -1,0 +1,4 @@
+<article class="w-full flex items-center justify-evenly px-8 py-2 rounded-md cursor-pointer transition-colors duration-300 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white" [routerLink]="sideItem?.url">
+    <img *ngIf="sideItem?.icon" [ngSrc]="sideItem?.icon!" [alt]="sideItem?.label" width="20" height="20">
+    <p class="font-dancing font-normal text-[18px] leading-6 transition-colors duration-300">{{sideItem?.label}}</p>
+</article>
