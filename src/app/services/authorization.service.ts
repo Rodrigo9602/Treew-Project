@@ -40,9 +40,9 @@ export class TrelloAuthService {
   private router = inject(Router);
 
   // Configuración de Trello API
-  private readonly TRELLO_API_KEY = 'TRELLO_API_KEY'; // Reemplazar con tu API Key
+  private readonly TRELLO_API_KEY = '3eff9fe8c77e7342654b9fbda1b05414';  
   private readonly TRELLO_API_BASE = 'https://api.trello.com/1';
-  private readonly APP_NAME = 'Tu App Name'; // Nombre de tu aplicación
+  private readonly APP_NAME = 'Treello';
   
   // Estado del usuario
   private userSubject = new BehaviorSubject<TrelloUser | null>(null);
@@ -103,9 +103,9 @@ export class TrelloAuthService {
   loginWithTrello(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const scope = 'read,write'; // Permisos que necesitas
+    const scope = 'read,write,account,offline_access'; // Permisos necesarios
     const expiration = '30days'; // Duración del token
-    const returnUrl = encodeURIComponent(window.location.origin + '/auth/trello/callback');
+    const returnUrl = encodeURIComponent(window.location.origin + '/callback'); // url de redireccion para verificacion de token de usuario
     
     const authUrl = `https://trello.com/1/authorize?` +
       `expiration=${expiration}&` +
