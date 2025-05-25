@@ -1,19 +1,38 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TrelloCard } from '../../services/authorization.service';
+import { CheckListProgress, getCardPriority, getChecklistProgress } from '../../utils/utils';
+import { GlobalVariablesService } from '../../services/global-variables.service';
 
 @Component({
   selector: 'app-card',
-  imports: [NgOptimizedImage],
+  imports: [CommonModule],
   templateUrl: './card.component.html',
   styleUrl: './card.component.scss'
 })
-export class CardComponent {
+export class CardComponent implements OnInit{
   @Input() card:TrelloCard | undefined;
-  @Output() onCardSelected = new EventEmitter<string>();
+ 
+  public priority: 'high' | 'medium' | 'low' | 'none' = 'none';
+  public checklistProgress: CheckListProgress | undefined;
 
-  onCardOpen(cardId: string) {
-    this.onCardSelected.emit(cardId);
+  constructor(private globalService: GlobalVariablesService) {}
+
+  ngOnInit(): void {
+    // obtener la prioridad de la tarjeta
+    if (this.card) {
+      this.priority = getCardPriority(this.card);
+    }
+
+    // obtener el progreso de la checklist
+    if (this.card && this.card.checklists) {
+      const progress = getChecklistProgress(this.card);
+      this.checklistProgress = progress;
+    }
   }
+
+  onCardOpen(card: TrelloCard) {    
+    this.globalService.selectedCardSubject.next(card);
+  } 
 
 }
