@@ -1,0 +1,35 @@
+<div
+  class="flex justify-center items-center min-h-screen p-5"
+>
+  <div class="bg-white rounded-xl p-10 shadow-2xl max-w-md w-full text-center">
+    <div class="w-full flex items-center justify-center gap-3">
+      <img ngSrc="assets/images/logo.png" alt="Attalssian-Logo" width="40" height="40" class="-mt-4"/>
+      <h1 class="text-slate-800 mb-4 text-3xl font-semibold">Iniciar Sesión</h1>
+    </div>
+    
+    <p class="text-slate-500 mb-8 leading-relaxed">
+      Conecta tu cuenta de Trello para acceder a tus tableros y tarjetas
+    </p>
+
+    <button
+      class="flex items-center justify-center gap-3 w-full py-3.5 px-6 bg-blue-600 text-white border-none rounded-lg text-base font-medium cursor-pointer transition-all duration-200 mb-8 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+      (click)="loginWithTrello()"
+      [disabled]="isLoading"
+    >
+      <img src="https://trello.com/favicon.ico" alt="Trello" class="w-5 h-5" />
+      {{ isLoading ? "Conectando..." : "Conectar con Trello" }}
+    </button>
+
+    <div class="text-left p-5 bg-slate-50 rounded-lg">
+      <h3 class="text-slate-800 text-base mb-3 font-medium">
+        ¿Qué permisos necesitamos?
+      </h3>
+      <ul class="text-slate-500 pl-5 leading-relaxed list-disc">
+        <li class="mb-2">Ver tus tableros, listas y tarjetas</li>
+        <li class="mb-2">Crear, editar y eliminar listas</li>
+        <li class="mb-2">Crear, editar y eliminar tarjetas</li>
+        <li class="mb-2">Acceso a tu información básica de perfil</li>
+      </ul>
+    </div>
+  </div>
+</div>

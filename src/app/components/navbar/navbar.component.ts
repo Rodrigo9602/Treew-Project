@@ -4,6 +4,7 @@ import { MenuItem } from './nav-item/nav-item.component';
 import { NgOptimizedImage } from '@angular/common';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { SidebarService } from '../../services/components/sidebar.service';
+import { TrelloAuthService } from '../../services/authorization.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,7 +16,7 @@ export class NavbarComponent implements OnInit{
   items: MenuItem[] | undefined;
   opened:boolean = false;
 
-  constructor(private sidebar:SidebarService) {}
+  constructor(private sidebar:SidebarService, private trelloAuthService:TrelloAuthService) {}
 
   ngOnInit(): void {
     this.items = [      
@@ -28,6 +29,10 @@ export class NavbarComponent implements OnInit{
 
   onSideBarOpen():void {
     this.opened = !this.opened;
-    this.opened ? this.sidebar.open() : this.sidebar.close();
+    this.sidebar.setMenuExpanded(this.opened);
+  }
+
+  logout():void {
+    this.trelloAuthService.logout();
   }
 }

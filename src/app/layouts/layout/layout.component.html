@@ -1,0 +1,17 @@
+<div class="w-full flex flex-col h-screen overflow-hidden">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <!-- Contenedor principal -->
+  <div class="w-full flex flex-1 overflow-hidden md:grid md:grid-cols-12">
+    <!-- Sidebar -->
+    <div class="md:col-span-2">
+      <app-sidebar></app-sidebar>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 w-full transition-transform md:col-span-10">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

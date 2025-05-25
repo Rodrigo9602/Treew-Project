@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
-import { MenuItem } from '../../navbar/nav-item/nav-item.component';
+import { SideItem } from '../sidebar.component';
+
 
 @Component({
   selector: 'app-side-item',
@@ -11,5 +12,10 @@ import { MenuItem } from '../../navbar/nav-item/nav-item.component';
   styleUrl: './side-item.component.scss'
 })
 export class SideItemComponent {
-  @Input() sideItem: MenuItem | undefined;
+  @Input() sideItem: SideItem | undefined;
+  @Output() selectedBoardChanged = new EventEmitter<string>();
+
+  onSelectNewBoard(id:string): void {     
+    this.selectedBoardChanged.emit(id);
+  }
 }
