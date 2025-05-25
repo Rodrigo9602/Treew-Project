@@ -1,0 +1,22 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700">List name</label>
+      <div class="mt-1 text-slate-800 font-semibold">{{ listName }}</div>
+    </div>
+  
+    <div>
+      <label for="order" class="block text-sm font-medium text-slate-700">Order</label>
+      <select
+        id="order"
+        formControlName="order"
+        class="mt-1 block w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      >
+      @for (option of orderOptions; track option) {
+        <option [value]="option">
+            {{ option }}
+          </option>
+      }        
+      </select>
+    </div>  
+  </form>
+  
