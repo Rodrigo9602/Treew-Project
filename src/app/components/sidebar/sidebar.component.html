@@ -1,23 +1,105 @@
-<section class="h-screen bg-white fixed top-12 left-0 border-r border-[#cbd5e1] transform transition-all duration-300 ease-in-out"
- [ngClass]="isOpen ? 'translate-x-0 z-50 opacity-100 w-2/3 md:w-1/5 md:z-0' : '-translate-x-full opacity-0 w-0 md:w-16 md:translate-x-0 md:opacity-100'">
-    
-   <!-- Contenido del sidenav -->
-  <div class="pt-12 pb-4 px-2 transition-opacity duration-300" [ngClass]="{'opacity-100': isOpen, 'opacity-0': !isOpen}">   
-     <div class="w-full flex flex-col items-center justify-center gap-12">
-      <h1>Mis tableros</h1>
-      <div class="w-full flex flex-col items-center justify-center gap-4">
-         @for (item of sideItems; track $index) {
-            <app-side-item [sideItem]="item" class="w-full"></app-side-item>
-        }
-      </div>       
+<!-- Desktop Sidebar -->
+<section class="hidden md:block w-full h-full bg-white border-r border-slate-200 shadow-sm">
+   <div class="h-full flex flex-col">
+     <!-- Header -->
+     <div class="p-6 border-b border-slate-100">
+       <div class="flex items-center gap-3">
+         <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+           </svg>
+         </div>
+         <h1 class="text-lg font-semibold text-slate-800">My Boards</h1>
+       </div>
      </div>
-  </div> 
-</section>
-
-<!-- Overlay para cerrar el sidenav al hacer clic fuera  -->
-<div *ngIf="isOpen" 
-     class="md:hidden fixed top-12 left-0 bg-white backdrop-blur-lg bg-opacity-50 z-40 transition-opacity duration-300"
-     (click)="closeNav()">
-</div>
-
-
+ 
+     <!-- Boards List -->
+     <div class="flex-1 overflow-y-auto p-4">
+       <div class="space-y-2">
+         @for (item of sideItems; track item.id) {
+           <app-side-item [sideItem]="item" class="w-full"></app-side-item>
+         }
+         
+         @if (sideItems.length === 0) {
+           <div class="text-center py-8 text-slate-400">
+             <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+             </svg>
+             <p class="text-sm">No boards yet</p>
+             <p class="text-xs mt-1">Create your first board</p>
+           </div>
+         }
+       </div>
+     </div>
+ 
+     <!-- Footer -->
+     <div class="p-4 border-t border-slate-100">
+       <button class="w-full px-4 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+         </svg>
+         Create Board
+       </button>
+     </div>
+   </div>
+ </section>
+ 
+ <!-- Mobile Sidebar -->
+ <section class="md:hidden fixed top-12 left-0 h-screen bg-white border-r border-slate-200 transform transition-all duration-300 ease-in-out z-50"
+          [ngClass]="isOpen ? 'translate-x-0 w-2/3' : '-translate-x-full w-0'">
+   
+   <div class="h-full flex flex-col" [ngClass]="{'opacity-100': isOpen, 'opacity-0': !isOpen}">
+     <!-- Mobile Header -->
+     <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+       <div class="flex items-center gap-3">
+         <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+           </svg>
+         </div>
+         <h1 class="text-lg font-semibold text-slate-800">My Boards</h1>
+       </div>
+       <button (click)="closeNav()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+         </svg>
+       </button>
+     </div>
+ 
+     <!-- Mobile Boards List -->
+     <div class="flex-1 overflow-y-auto p-4">
+       <div class="space-y-2">
+         @for (item of sideItems; track item.id) {
+           <app-side-item [sideItem]="item" class="w-full" (click)="closeNav()"></app-side-item>
+         }
+         
+         @if (sideItems.length === 0) {
+           <div class="text-center py-8 text-slate-400">
+             <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+             </svg>
+             <p class="text-sm">No boards yet</p>
+             <p class="text-xs mt-1">Create your first board</p>
+           </div>
+         }
+       </div>
+     </div>
+ 
+     <!-- Mobile Footer -->
+     <div class="p-4 border-t border-slate-100 relative bottom-10">
+       <button class="w-full px-4 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+               (click)="closeNav()">
+         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+         </svg>
+         Create Board
+       </button>
+     </div>
+   </div>
+ </section>
+ 
+ <!-- Mobile Overlay -->
+ <div *ngIf="isOpen" 
+      class="md:hidden fixed top-12 left-0 bg-white backdrop-blur-lg bg-opacity-50 z-40 transition-opacity duration-3000"
+      (click)="closeNav()">
+ </div>

@@ -2,8 +2,8 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarService } from '../../services/components/sidebar.service';
 import { SideItemComponent } from './side-item/side-item.component';
-import { MenuItem } from '../navbar/nav-item/nav-item.component';
 import { TrelloAuthService } from '../../services/authorization.service';
+import { GlobalVariablesService } from '../../services/global-variables.service';
 
 export interface SideItem {
   label: string;
@@ -22,7 +22,7 @@ export class SidebarComponent implements OnInit {
   isOpen: boolean = false;
   sideItems: SideItem[] = [];  
 
-  constructor(private sidenav: SidebarService, private trelloService: TrelloAuthService) { }
+  constructor(private sidenav: SidebarService, private trelloService: TrelloAuthService, private globalService: GlobalVariablesService) { }
 
   ngOnInit(): void {
     // Obtener listado de tableros del usuario
@@ -62,7 +62,7 @@ export class SidebarComponent implements OnInit {
 
   // evento para seleccionar nuevo tablero
   selectBoard(boardId: string): void {
-    this.trelloService.selectedBoardIDSubject.next(boardId);
+    this.globalService.selectedBoardIDSubject.next(boardId);
   }
 
   // Método para cerrar el sidenav al hacer clic en el overlay
