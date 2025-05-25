@@ -1,0 +1,4 @@
+<article class="w-full px-2 md:px-8 py-4 bg-white rounded-md shadow-sm flex items-center justify-between">
+  <p class="w-[200px] md:w-[450px] truncate">{{card?.name}}</p>
+  <img ngSrc="assets/icons/open-in-new-window.svg" alt="Open in new window" class="cursor-pointer" width="25" height="25" (click)="onCardOpen(card?.id!)" />
+</article>
