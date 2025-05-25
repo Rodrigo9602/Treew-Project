@@ -14,11 +14,7 @@ export class SidebarService {
     this.sidenavState.next(!this.sidenavState.value);
   }
 
-  open() {
-    this.sidenavState.next(true);
-  }
-
-  close() {
-    this.sidenavState.next(false);
+  setMenuExpanded(expanded: boolean) {
+    this.sidenavState.next(expanded);
   }
 }
