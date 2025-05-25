@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
@@ -13,6 +13,7 @@ import { TrelloAuthService, TrelloCard } from '../../../services/authorization.s
   styleUrl: './card-form.component.scss'
 })
 export class CardFormComponent implements OnInit, OnDestroy {
+  @Output() onCardUpdated = new EventEmitter<boolean>(false);
   cardForm: FormGroup;
   cardData: TrelloCard | null = null;
   isLoading = false;
@@ -144,8 +145,8 @@ export class CardFormComponent implements OnInit, OnDestroy {
   private handleSuccess(updatedCard: TrelloCard): void {
     this.isLoading = false;
     console.log('Card updated successfully:', updatedCard);
-    // Aquí podrías emitir un evento o actualizar el estado global
-    // this.globalService.updateSelectedCard(updatedCard);
+    // emitir un evento para el cierre del modal
+    this.onCardUpdated.emit(true);
   }
 
   private handleError(error: any): void {
