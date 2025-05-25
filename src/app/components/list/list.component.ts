@@ -11,7 +11,8 @@ import { CardComponent } from '../card/card.component';
   styleUrl: './list.component.scss'
 })
 export class ListComponent implements OnInit {
-  @Input() list: TrelloList | undefined;
+  @Input() list: TrelloList | undefined;  
+
   public cardsList: TrelloCard[] = [];
 
   constructor(private trelloService: TrelloAuthService) {}
@@ -19,9 +20,9 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     // Obtener listado de tarjetas para la lista actual
     if (this.list) {
-      this.trelloService.getListCards(this.list.id).subscribe((cards) => {
+      this.trelloService.getListCards(this.list.id, true).subscribe((cards) => {              
         this.cardsList = cards;        
       });
     }
-  }
+  }  
 }
