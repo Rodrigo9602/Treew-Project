@@ -11,7 +11,7 @@ export class GlobalVariablesService {
   public selectedBoardID$ = this.selectedBoardIDSubject.asObservable();
 
   // lista seleccionada
-  public selectedListSubject = new BehaviorSubject<TrelloList | null>(null);
+  public selectedListSubject = new BehaviorSubject<string | null>(null);
   public selectedList$ = this.selectedListSubject.asObservable();
 
   // tarjeta seleccionada
