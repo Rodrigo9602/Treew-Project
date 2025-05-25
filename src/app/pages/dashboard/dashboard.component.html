@@ -52,13 +52,13 @@
         <!-- Board lists container -->
         <div class="w-full overflow-x-auto overflow-y-hidden pb-6">
             <div 
-            class="flex gap-6 w-max min-w-full"
-            cdkDropList
-            [cdkDropListData]="boardLists"
-            (cdkDropListDropped)="dropList($event)">
+            class="flex gap-6 w-max min-w-full">
                 @for (boardItem of boardLists; track boardItem.id) {
                     <div class="flex-shrink-0">
-                        <app-list [list]="boardItem" cdkDrag></app-list>
+                        <app-list 
+                        [list]="boardItem"
+                        (onEditList)="onEditList($event)"
+                        (onMoveList)="onMoveList($event)"></app-list>
                     </div>
                 }
                 
@@ -130,6 +130,102 @@
              </button>
              <button
                (click)="newListForm.onSubmit()"             
+               class="px-4 py-2 cursor-pointer bg-blue-500 transition-colors text-white text-[clamp(12px,2vw,16px)] rounded-lg hover:bg-blue-600"
+             >
+               Save
+             </button>
+         </div>
+    </app-modal>
+}
+
+@if(moveListModalOpen) {
+    <app-modal [isVisible]="moveListModalOpen" (onClose)="onCloseMoveListModal()">
+        <div modal-header>
+            <h1>
+                Move Current List
+            </h1>
+        </div>
+
+        <div modal-content>
+            <!--componente de orden de lista-->
+            <app-list-order-form
+            [listName]="selectedList?.name!"
+            [currentOrder]="selectedListOrder"
+            [totalLists]="boardLists.length"
+            (reorder)="handleReorder($event)"
+            #orderForm></app-list-order-form>            
+         </div>
+       
+         <div modal-footer class="flex justify-end gap-3">
+             <button
+             (click)="orderForm.resetForm(); moveListModalOpen = false;"                         
+              class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)]"
+             >
+               Cancel
+             </button>
+             <button 
+               (click)="orderForm.onSubmit()"                                 
+               class="px-4 py-2 cursor-pointer bg-blue-500 transition-colors text-white text-[clamp(12px,2vw,16px)] rounded-lg hover:bg-blue-600"
+             >
+               Save
+             </button>
+         </div>
+    </app-modal>
+}
+
+@if(modalEditListOpen) {
+    <app-modal [isVisible]="modalEditListOpen" (onClose)="onCloseEditListModal()">
+        <div modal-header>
+            <h1>
+                Edit list
+            </h1>
+        </div>
+
+        <div modal-content>
+            <!--componente de edicion de lista--> 
+            <app-edit-list-form [listName]="selectedList?.name!" (editedList)="onListEdited($event)"
+            #editListForm></app-edit-list-form>               
+         </div>
+       
+         <div modal-footer class="flex justify-end gap-3">
+             <button
+             (click)="editListForm.resetForm(); onCloseEditListModal()"                         
+              class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)]"
+             >
+               Cancel
+             </button>
+             <button 
+               (click)="editListForm.onSubmit()"                                
+               class="px-4 py-2 cursor-pointer bg-blue-500 transition-colors text-white text-[clamp(12px,2vw,16px)] rounded-lg hover:bg-blue-600"
+             >
+               Save
+             </button>
+         </div>
+    </app-modal>
+}
+
+@if(createNewBoardModal) {
+    <app-modal [isVisible]="createNewBoardModal" (onClose)="createNewBoardModal = false">
+        <div modal-header>
+            <h1>
+                Create new board
+            </h1>
+        </div>
+
+        <div modal-content>
+            <!--componente de creacion de tablero --> 
+            <app-new-board-form (newBoardName)="onCreateNewBoard($event)" #createBoardForm></app-new-board-form>      
+         </div>
+       
+         <div modal-footer class="flex justify-end gap-3">
+             <button
+             (click)="createBoardForm.resetForm(); createNewBoardModal = false;"                         
+              class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)]"
+             >
+               Cancel
+             </button>
+             <button 
+               (click)="createBoardForm.onSubmit()"                                
                class="px-4 py-2 cursor-pointer bg-blue-500 transition-colors text-white text-[clamp(12px,2vw,16px)] rounded-lg hover:bg-blue-600"
              >
                Save
