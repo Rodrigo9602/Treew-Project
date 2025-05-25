@@ -1,7 +1,7 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, isPlatformServer, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface TrelloUser {
@@ -693,6 +693,59 @@ export class TrelloAuthService {
     return this.http.delete(url, { params });
   }
 
+  // Crear una nueva lista
+  createList(name: string, boardId: string): Observable<TrelloList> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+  
+    const url = `${this.TRELLO_API_BASE}/lists`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      name: name,
+      idBoard: boardId,
+       pos: 'bottom'
+    };
+  
+    return this.http.post<TrelloList>(url, null, { params });
+  }
+
+  // Actualizar lista
+  updateList(listId: string, newName: string): Observable<TrelloList> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+  
+    const url = `${this.TRELLO_API_BASE}/lists/${listId}`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      name: newName
+    };
+  
+    return this.http.put<TrelloList>(url, null, { params });
+  }
+
+  // Cerrar o archivar lista
+  updateListStatus(listId: string, closed: boolean): Observable<TrelloList> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+  
+    const url = `${this.TRELLO_API_BASE}/lists/${listId}/closed`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      value: closed.toString()
+    };
+  
+    return this.http.put<TrelloList>(url, null, { params });
+  }  
+
   // Crear un nuevo tablero
   createBoard(name: string, desc?: string): Observable<TrelloBoard> {
     const token = this.getTrelloToken();
@@ -743,6 +796,47 @@ export class TrelloAuthService {
     };
 
     return this.http.put(url, null, { params });
+  }
+
+  // modificar posicion de una tarjeta dentro de una lista
+  updateCardOrder(listId: string, cards: { id: string; position: number }[]): Observable<any> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+
+    const requests = cards.map((card) => {
+      const url = `${this.TRELLO_API_BASE}/cards/${card.id}`;
+      const body = {
+        key: this.TRELLO_API_KEY,
+        token,
+        idList: listId,
+        pos: card.position,
+      };
+      return this.http.put(url, null, { params: body as any });
+    });
+
+    return forkJoin(requests);
+  }
+
+  // modificar posicion de una lista dentro de un tablero
+  updateListOrder(boardId: string, lists: {id: string, position: number}[]): Observable<any> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+    const requests = lists.map((list) => {
+      const url = `${this.TRELLO_API_BASE}/lists/${list.id}`;
+      const body = {
+        key: this.TRELLO_API_KEY,
+        token,
+        idBoard: boardId,
+        pos: list.position,
+      };
+      return this.http.put(url, null, { params: body as any });
+    });
+
+    return forkJoin(requests);
   }
 
   // Inicializar usuario (llamar después de la autenticación)
