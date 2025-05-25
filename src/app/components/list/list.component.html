@@ -2,7 +2,7 @@
   <!-- Header de la lista -->
   <header class="p-4 border-b border-slate-100">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold text-slate-800 truncate flex-1 mr-3">
+      <h2 class="text-lg font-semibold text-slate-800 truncate flex-1 mr-3" [title]="list?.name">
         {{list?.name}}
       </h2>
       <div class="flex items-center gap-2">
@@ -16,7 +16,8 @@
     </div>
     
     <!-- Add card button -->
-    <button class="w-full px-3 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 group cursor-pointer">
+    <button class="w-full px-3 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 group cursor-pointer"
+      (click)="addNewCard()">
       <svg class="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
       </svg>
@@ -25,9 +26,13 @@
   </header>
 
   <!-- Cards container -->
-  <div class="p-4 space-y-3 max-h-96 overflow-y-auto">
+  <div 
+  class="p-4 space-y-3 max-h-96 overflow-y-auto"
+  cdkDropList
+  [cdkDropListData]="cardsList"
+  (cdkDropListDropped)="dropCard($event)">
     @for (cardItem of cardsList; track cardItem.id) {
-      <div class="transform hover:scale-[1.02] transition-transform duration-150">
+      <div class="transform hover:scale-[1.02] transition-transform duration-150" cdkDrag>
         <app-card [card]="cardItem"></app-card>
       </div>
     }
@@ -40,6 +45,11 @@
         <p class="text-sm">No cards yet</p>
         <p class="text-xs mt-1">Add a card to get started</p>
       </div>
+    }
+
+    @if(onAddNewCard) {
+      <!--Definimos un formulario pequeño con los campos name y desc correspondientes a la nueva card-->
+      <app-new-card (createCard)="handleCreateCard($event)" (abortAction)="onAddNewCard = false;"></app-new-card>
     }
   </div>
 
