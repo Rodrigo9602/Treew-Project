@@ -8,14 +8,23 @@ export interface CheckListProgress {
 
 // Calcular progreso de checklist
 export function getChecklistProgress(card: TrelloCard): CheckListProgress {
-  if (!card.badges) {
+  let total = 0;
+  let completed = 0;
+  let percentage = 0;
+  
+  if (card.checklists.length === 0) {
     return { total: 0, completed: 0, percentage: 0 };
   }
 
-  const total = card.badges.checkItems || 0;
-  const completed = card.badges.checkItemsChecked || 0;
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
+  card.checklists.forEach((checkList) => {
+    total += checkList.checkItems.length;
+    checkList.checkItems.forEach((item) => {
+      if(item.state === 'complete') {
+        completed++;
+      }
+    });
+  });  
+  percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   return { total, completed, percentage };
 }
 
