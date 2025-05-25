@@ -25,7 +25,7 @@ export class CardComponent implements OnInit{
     }
 
     // obtener el progreso de la checklist
-    if (this.card && this.card.checklists) {
+    if (this.card && this.card.checklists) {      
       const progress = getChecklistProgress(this.card);
       this.checklistProgress = progress;
     }
