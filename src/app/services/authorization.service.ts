@@ -24,6 +24,7 @@ export interface TrelloList {
   id: string;
   name: string;
   closed: boolean;
+  pos: number;
 }
 
 export interface TrelloCard {
@@ -35,63 +36,63 @@ export interface TrelloCard {
   idBoard: string;
   idList: string;
   closed: boolean;
-  
+
   // Campos de fecha y tiempo
-  due: string | null;                    // Fecha de vencimiento (ISO 8601)
-  dueComplete: boolean;                  // Si la fecha de vencimiento está marcada como completada
-  dueReminder: number | null;            // Recordatorio en minutos antes del vencimiento
-  start: string | null;                  // Fecha de inicio
-  
+  due: string | null; // Fecha de vencimiento (ISO 8601)
+  dueComplete: boolean; // Si la fecha de vencimiento está marcada como completada
+  dueReminder: number | null; // Recordatorio en minutos antes del vencimiento
+  start: string | null; // Fecha de inicio
+
   // Campos de posición y orden
-  pos: number;                          // Posición en la lista
-  
+  pos: number; // Posición en la lista
+
   // Campos de actividad y fechas
-  dateLastActivity: string;             // Última actividad en la tarjeta
-  
-  // Campos de etiquetas (labels) 
-  labels: TrelloLabel[];                // Etiquetas de color (pueden usarse para prioridad)
-  
+  dateLastActivity: string; // Última actividad en la tarjeta
+
+  // Campos de etiquetas (labels)
+  labels: TrelloLabel[]; // Etiquetas de color (pueden usarse para prioridad)
+
   // Campos de miembros
-  idMembers: string[];                  // IDs de miembros asignados
-  members: TrelloMember[];              // Información completa de miembros (si se incluye)
-  
+  idMembers: string[]; // IDs de miembros asignados
+  members: TrelloMember[]; // Información completa de miembros (si se incluye)
+
   // Campos de checklist y progreso
-  idChecklists: string[];               // IDs de checklists
-  checklists: TrelloChecklist[];        // Checklists completos (si se incluye)
+  idChecklists: string[]; // IDs de checklists
+  checklists: TrelloChecklist[]; // Checklists completos (si se incluye)
   checkItemStates: TrelloCheckItemState[]; // Estados de items de checklist
-  
+
   // Campos de adjuntos
-  badges: TrelloBadges;                 // Contadores (comentarios, adjuntos, checklists, etc.)
-  
+  badges: TrelloBadges; // Contadores (comentarios, adjuntos, checklists, etc.)
+
   // Campos de cover (imagen de portada)
-  cover: TrelloCover | null;            // Imagen de portada
-  
+  cover: TrelloCover | null; // Imagen de portada
+
   // Campos de subscripción
-  subscribed: boolean;                  // Si el usuario está suscrito a notificaciones
-  
+  subscribed: boolean; // Si el usuario está suscrito a notificaciones
+
   // Campos personalizados
   customFieldItems: TrelloCustomFieldItem[]; // Campos personalizados
-  
+
   // Campos de votación
-  idMembersVoted: string[];             // Miembros que han votado
-  
+  idMembersVoted: string[]; // Miembros que han votado
+
   // Información de archivo
-  isTemplate: boolean;                  // Si es una plantilla
-  cardRole: string | null;             // Rol de la tarjeta
-  
+  isTemplate: boolean; // Si es una plantilla
+  cardRole: string | null; // Rol de la tarjeta
+
   // Límites
-  limits: TrelloLimits | null;          // Límites de la tarjeta
-  
+  limits: TrelloLimits | null; // Límites de la tarjeta
+
   // Coordenadas (para tableros con mapas)
   coordinates: TrelloCoordinates | null;
-  
+
   // Campo de dirección
   address: string | null;
   locationName: string | null;
-  
+
   // Stickers
   stickers: TrelloSticker[];
-  
+
   // Plugin data
   pluginData: TrelloPluginData[];
 }
@@ -101,7 +102,18 @@ export interface TrelloLabel {
   id: string;
   idBoard: string;
   name: string;
-  color: 'yellow' | 'purple' | 'blue' | 'red' | 'green' | 'orange' | 'black' | 'sky' | 'pink' | 'lime' | null;
+  color:
+    | 'yellow'
+    | 'purple'
+    | 'blue'
+    | 'red'
+    | 'green'
+    | 'orange'
+    | 'black'
+    | 'sky'
+    | 'pink'
+    | 'lime'
+    | null;
   uses: number;
 }
 
@@ -232,7 +244,7 @@ export interface TrelloPluginData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TrelloAuthService {
   private platformId = inject(PLATFORM_ID);
@@ -241,26 +253,17 @@ export class TrelloAuthService {
   private router = inject(Router);
 
   // Configuración de Trello API
-  private readonly TRELLO_API_KEY = '3eff9fe8c77e7342654b9fbda1b05414';  
+  private readonly TRELLO_API_KEY = '3eff9fe8c77e7342654b9fbda1b05414';
   private readonly TRELLO_API_BASE = 'https://api.trello.com/1';
   private readonly APP_NAME = 'Treello';
-  
+
   // Estado del usuario
   private userSubject = new BehaviorSubject<TrelloUser | null>(null);
   public user$ = this.userSubject.asObservable();
 
-  // tablero seleccionado
-  public selectedBoardIDSubject = new BehaviorSubject<string | null>(null);
-  public selectedBoardID$ = this.selectedBoardIDSubject.asObservable();
-
-  // lista seleccionada
-  public selectedListSubject = new BehaviorSubject<TrelloList | null>(null);
-  public selectedList$ = this.selectedListSubject.asObservable();
-
-  // tarjeta seleccionada
-  public selectedCardSubject = new BehaviorSubject<TrelloCard | null>(null);
-  public selectedCard$ = this.selectedCardSubject.asObservable();
-
+  // observable para manejo de nuevo tablero
+  public newBoardSubject = new BehaviorSubject<boolean | null>(null);
+  public newBoard$ = this.newBoardSubject.asObservable();
 
   private redirectFlag: string | null = null;
 
@@ -320,8 +323,9 @@ export class TrelloAuthService {
     const scope = 'read,write,account'; // Permisos necesarios
     const expiration = '30days'; // Duración del token
     const returnUrl = encodeURIComponent(window.location.origin + '/callback'); // url de redireccion para verificacion de token de usuario
-    
-    const authUrl = `https://trello.com/1/authorize?` +
+
+    const authUrl =
+      `https://trello.com/1/authorize?` +
       `expiration=${expiration}&` +
       `name=${encodeURIComponent(this.APP_NAME)}&` +
       `scope=${scope}&` +
@@ -339,17 +343,17 @@ export class TrelloAuthService {
 
     const urlParams = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    
+
     // El token puede venir en query params o hash
     const token = urlParams.get('token') || hashParams.get('token');
-    
-    if (token) {      
+
+    if (token) {
       this.setTrelloToken(token);
       // Limpiar URL
       window.history.replaceState({}, document.title, window.location.pathname);
       return true;
     }
-    
+
     return false;
   }
 
@@ -364,7 +368,7 @@ export class TrelloAuthService {
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      fields: 'id,username,fullName,email,avatarUrl'
+      fields: 'id,username,fullName,email,avatarUrl',
     };
 
     return this.http.get<TrelloUser>(url, { params });
@@ -382,7 +386,7 @@ export class TrelloAuthService {
       key: this.TRELLO_API_KEY,
       token: token,
       fields: 'id,name,desc,url,closed',
-      filter: 'open' // Solo tableros abiertos
+      filter: 'open', // Solo tableros abiertos
     };
 
     return this.http.get<TrelloBoard[]>(url, { params });
@@ -398,37 +402,41 @@ export class TrelloAuthService {
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      fields: 'id,name,closed'
+      fields: 'id,name,pos,closed',
     };
     return this.http.get<any[]>(url, { params });
   }
 
   // obterner tarjetas de una lista específica
-  getListCards(listId: string, includeExtendedData: boolean = false): Observable<TrelloCard[]> {
+  getListCards(
+    listId: string,
+    includeExtendedData: boolean = false
+  ): Observable<TrelloCard[]> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/lists/${listId}/cards`;
-    
+
     // Campos básicos
-    let fields = 'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
-    
+    let fields =
+      'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
+
     // Parámetros básicos
     const params: any = {
       key: this.TRELLO_API_KEY,
       token: token,
-      fields: fields
+      fields: fields,
     };
-  
+
     // Si se requieren datos extendidos, agregar más información
     if (includeExtendedData) {
       params.members = 'true';
       params.member_fields = 'id,username,fullName,avatarUrl,initials';
       params.checklists = 'all';
       params.checklist_fields = 'id,name,pos';
-      params.checkItemStates = 'true';      
+      params.checkItemStates = 'true';
       params.labels = 'true';
       params.label_fields = 'id,name,color';
       params.customFieldItems = 'true';
@@ -437,27 +445,31 @@ export class TrelloAuthService {
       params.stickers = 'true';
       params.pluginData = 'true';
     }
-  
+
     return this.http.get<TrelloCard[]>(url, { params });
   }
-  
+
   // Método actualizado para obtener tarjetas de un tablero con campos extendidos
-  getBoardCards(boardId: string, includeExtendedData: boolean = false): Observable<TrelloCard[]> {
+  getBoardCards(
+    boardId: string,
+    includeExtendedData: boolean = false
+  ): Observable<TrelloCard[]> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/boards/${boardId}/cards`;
-    
-    let fields = 'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
-    
+
+    let fields =
+      'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
+
     const params: any = {
       key: this.TRELLO_API_KEY,
       token: token,
-      fields: fields
+      fields: fields,
     };
-  
+
     if (includeExtendedData) {
       params.members = 'true';
       params.member_fields = 'id,username,fullName,avatarUrl,initials';
@@ -471,17 +483,17 @@ export class TrelloAuthService {
       params.stickers = 'true';
       params.pluginData = 'true';
     }
-  
+
     return this.http.get<TrelloCard[]>(url, { params });
   }
-  
+
   // Nuevo método para obtener una tarjeta específica con todos los detalles
   getCardDetails(cardId: string): Observable<TrelloCard> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}`;
     const params = {
       key: this.TRELLO_API_KEY,
@@ -501,148 +513,160 @@ export class TrelloAuthService {
       board: 'true',
       board_fields: 'id,name',
       list: 'true',
-      list_fields: 'id,name'
+      list_fields: 'id,name',
     };
-  
+
     return this.http.get<TrelloCard>(url, { params });
   }
-  
+
   // Método para obtener campos personalizados de un tablero
   getBoardCustomFields(boardId: string): Observable<any[]> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/boards/${boardId}/customFields`;
     const params = {
       key: this.TRELLO_API_KEY,
-      token: token
+      token: token,
     };
-  
+
     return this.http.get<any[]>(url, { params });
   }
-  
+
   // Método para actualizar fecha de vencimiento de una tarjeta
-  updateCardDueDate(cardId: string, dueDate: string | null, dueComplete: boolean = false): Observable<TrelloCard> {
+  updateCardDueDate(
+    cardId: string,
+    dueDate: string | null,
+    dueComplete: boolean = false
+  ): Observable<TrelloCard> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}`;
     const params: any = {
       key: this.TRELLO_API_KEY,
       token: token,
       due: dueDate,
-      dueComplete: dueComplete.toString()
+      dueComplete: dueComplete.toString(),
     };
-  
+
     return this.http.put<TrelloCard>(url, null, { params });
   }
-  
+
   // Método para agregar etiqueta a una tarjeta
   addLabelToCard(cardId: string, labelId: string): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/idLabels`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      value: labelId
+      value: labelId,
     };
-  
+
     return this.http.post(url, null, { params });
   }
-  
+
   // Método para remover etiqueta de una tarjeta
   removeLabelFromCard(cardId: string, labelId: string): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/idLabels/${labelId}`;
     const params = {
       key: this.TRELLO_API_KEY,
-      token: token
+      token: token,
     };
-  
+
     return this.http.delete(url, { params });
   }
-  
+
   // Método para asignar miembro a una tarjeta
   addMemberToCard(cardId: string, memberId: string): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/idMembers`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      value: memberId
+      value: memberId,
     };
-  
+
     return this.http.post(url, null, { params });
   }
-  
+
   // Método para remover miembro de una tarjeta
   removeMemberFromCard(cardId: string, memberId: string): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/idMembers/${memberId}`;
     const params = {
       key: this.TRELLO_API_KEY,
-      token: token
+      token: token,
     };
-  
+
     return this.http.delete(url, { params });
   }
-  
+
   // Método para crear checklist en una tarjeta
   createChecklist(cardId: string, name: string): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/checklists`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      name: name
+      name: name,
     };
-  
+
     return this.http.post(url, null, { params });
   }
-  
+
   // Método para actualizar item de checklist
-  updateChecklistItem(cardId: string, checkItemId: string, state: 'complete' | 'incomplete'): Observable<any> {
+  updateChecklistItem(
+    cardId: string,
+    checkItemId: string,
+    state: 'complete' | 'incomplete'
+  ): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}/checkItem/${checkItemId}`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      state: state
+      state: state,
     };
-  
+
     return this.http.put(url, null, { params });
   }
 
   // Crear una nueva tarjeta
-  createCard(listId: string, name: string, desc?: string): Observable<TrelloCard> {
+  createCard(
+    listId: string,
+    name: string,
+    desc?: string
+  ): Observable<TrelloCard> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
@@ -654,14 +678,17 @@ export class TrelloAuthService {
       token: token,
       idList: listId,
       name: name,
-      desc: desc || ''
+      desc: desc || '',
     };
 
     return this.http.post<TrelloCard>(url, null, { params });
   }
 
   // Actualizar una tarjeta
-  updateCard(cardId: string, updates: Partial<{name: string, desc: string}>): Observable<TrelloCard> {
+  updateCard(
+    cardId: string,
+    updates: Partial<{ name: string; desc: string }>
+  ): Observable<TrelloCard> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
@@ -671,11 +698,11 @@ export class TrelloAuthService {
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      ...updates
+      ...updates,
     };
 
     return this.http.put<TrelloCard>(url, null, { params });
-  }  
+  }
 
   // Eliminar una tarjeta
   deleteCard(cardId: string): Observable<any> {
@@ -687,7 +714,7 @@ export class TrelloAuthService {
     const url = `${this.TRELLO_API_BASE}/cards/${cardId}`;
     const params = {
       key: this.TRELLO_API_KEY,
-      token: token
+      token: token,
     };
 
     return this.http.delete(url, { params });
@@ -699,16 +726,16 @@ export class TrelloAuthService {
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/lists`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
       name: name,
       idBoard: boardId,
-       pos: 'bottom'
+      pos: 'bottom',
     };
-  
+
     return this.http.post<TrelloList>(url, null, { params });
   }
 
@@ -718,14 +745,14 @@ export class TrelloAuthService {
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/lists/${listId}`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      name: newName
+      name: newName,
     };
-  
+
     return this.http.put<TrelloList>(url, null, { params });
   }
 
@@ -735,16 +762,16 @@ export class TrelloAuthService {
     if (!token) {
       throw new Error('No Trello token available');
     }
-  
+
     const url = `${this.TRELLO_API_BASE}/lists/${listId}/closed`;
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      value: closed.toString()
+      value: closed.toString(),
     };
-  
+
     return this.http.put<TrelloList>(url, null, { params });
-  }  
+  }
 
   // Crear un nuevo tablero
   createBoard(name: string, desc?: string): Observable<TrelloBoard> {
@@ -758,14 +785,18 @@ export class TrelloAuthService {
       key: this.TRELLO_API_KEY,
       token: token,
       name: name,
-      desc: desc || ''
+      desc: desc || '',
+      pos: 'bottom'
     };
 
     return this.http.post<TrelloBoard>(url, null, { params });
   }
 
   // Actualizar un tablero
-  updateBoard(boardId: string, updates: Partial<{name: string, desc: string}>): Observable<TrelloBoard> {
+  updateBoard(
+    boardId: string,
+    updates: Partial<{ name: string; desc: string }>
+  ): Observable<TrelloBoard> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
@@ -775,7 +806,7 @@ export class TrelloAuthService {
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      ...updates
+      ...updates,
     };
 
     return this.http.put<TrelloBoard>(url, null, { params });
@@ -792,14 +823,17 @@ export class TrelloAuthService {
     const params = {
       key: this.TRELLO_API_KEY,
       token: token,
-      value: 'true'
+      value: 'true',
     };
 
     return this.http.put(url, null, { params });
   }
 
   // modificar posicion de una tarjeta dentro de una lista
-  updateCardOrder(listId: string, cards: { id: string; position: number }[]): Observable<any> {
+  updateCardOrder(
+    listId: string,
+    cards: { id: string; position: number }[]
+  ): Observable<any> {
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
@@ -820,23 +854,19 @@ export class TrelloAuthService {
   }
 
   // modificar posicion de una lista dentro de un tablero
-  updateListOrder(boardId: string, lists: {id: string, position: number}[]): Observable<any> {
+  updateListOrder(list: { id: string; position: number | 'top' | 'bottom' }): Observable<any> {    
     const token = this.getTrelloToken();
     if (!token) {
       throw new Error('No Trello token available');
     }
-    const requests = lists.map((list) => {
-      const url = `${this.TRELLO_API_BASE}/lists/${list.id}`;
-      const body = {
-        key: this.TRELLO_API_KEY,
-        token,
-        idBoard: boardId,
-        pos: list.position,
-      };
-      return this.http.put(url, null, { params: body as any });
-    });
 
-    return forkJoin(requests);
+    const url = `${this.TRELLO_API_BASE}/lists/${list.id}`;
+    const body = {
+      key: this.TRELLO_API_KEY,
+      token,
+      pos: list.position,
+    };
+    return this.http.put(url, null, { params: body as any });
   }
 
   // Inicializar usuario (llamar después de la autenticación)
@@ -849,7 +879,7 @@ export class TrelloAuthService {
         error: (error) => {
           console.error('Error loading user:', error);
           this.logout();
-        }
+        },
       });
     }
   }
@@ -871,7 +901,8 @@ export class TrelloAuthService {
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('trello-token');
-      this.document.cookie = 'trello-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      this.document.cookie =
+        'trello-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       this.userSubject.next(null);
       this.router.navigate(['/login']);
     }
@@ -879,7 +910,7 @@ export class TrelloAuthService {
 
   // Verificar si el token es válido haciendo una llamada a la API
   validateToken(): Observable<boolean> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       this.getCurrentUser().subscribe({
         next: () => {
           observer.next(true);
@@ -888,14 +919,14 @@ export class TrelloAuthService {
         error: () => {
           observer.next(false);
           observer.complete();
-        }
+        },
       });
     });
   }
 
   private parseCookies(cookieHeader: string): Record<string, string> {
     const cookies: Record<string, string> = {};
-    cookieHeader.split(';').forEach(cookie => {
+    cookieHeader.split(';').forEach((cookie) => {
       const [name, value] = cookie.trim().split('=');
       if (name && value) {
         cookies[name] = decodeURIComponent(value);
