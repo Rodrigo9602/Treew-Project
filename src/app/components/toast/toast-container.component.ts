@@ -1,8 +1,8 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../services/component-services/toast.service';
+import { ToastService } from '../../services/components/toast.service';
 import { ToastItemComponent } from './toast-item.component';
-import { ToastPosition } from '../../interfaces/toast';
+import { ToastPosition } from './toast';
 
 @Component({
   selector: 'app-toast-container',

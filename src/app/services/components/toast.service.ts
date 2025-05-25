@@ -31,7 +31,7 @@ export class ToastService {
   }
 
   // Métodos de conveniencia para diferentes tipos de toast
-  success(header: string, message: string, duration?: number) {
+  success(header: string, message: string, duration?: number) {    
     return this.show({ type: 'success', header, message, duration });
   }
 

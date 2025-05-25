@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastConfig } from '../../interfaces/toast';
-import { ToastService } from '../../services/component-services/toast.service';
+import { ToastConfig } from './toast';
+import { ToastService } from '../../services/components/toast.service';
 
 @Component({
   selector: 'app-toast-item',
