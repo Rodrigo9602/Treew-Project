@@ -1,4 +1,4 @@
-@if(noBoardSelected) {
+@if(!selectedBoard) {
     <div class="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
         <!-- Icon placeholder -->
         <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
@@ -40,7 +40,7 @@
                     </svg>
                     Filter
                 </button>
-                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" (click)="onAddNewList()">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -51,10 +51,14 @@
         
         <!-- Board lists container -->
         <div class="w-full overflow-x-auto overflow-y-hidden pb-6">
-            <div class="flex gap-6 w-max min-w-full">
+            <div 
+            class="flex gap-6 w-max min-w-full"
+            cdkDropList
+            [cdkDropListData]="boardLists"
+            (cdkDropListDropped)="dropList($event)">
                 @for (boardItem of boardLists; track boardItem.id) {
                     <div class="flex-shrink-0">
-                        <app-list [list]="boardItem"></app-list>
+                        <app-list [list]="boardItem" cdkDrag></app-list>
                     </div>
                 }
                 
@@ -80,17 +84,17 @@
             <h1>
                 Edit card
             </h1>
-          </div>
+        </div>
       
-          <div modal-content>
+        <div modal-content>
            <!--componente de formulario de card-->
-           <app-card-form #cardForm></app-card-form>
-          </div>
+           <app-card-form (onCardUpdated)="cardUpdatedEvent()" #cardForm></app-card-form>
+        </div>
       
-          <div modal-footer class="flex justify-end gap-3">
+        <div modal-footer class="flex justify-end gap-3">
             <button 
               (click)="cardForm.resetForm(); onCloseCardModal()"             
-              class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)] hover:bg-red-500 hover:text-white"
+              class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)]"
             >
               Cancel
             </button>
@@ -100,6 +104,36 @@
             >
               Save
             </button>
-          </div>
+        </div>
+    </app-modal>
+}
+
+@if(openNewListModal) {
+    <app-modal [isVisible]="openNewListModal" (onClose)="onCloseNewListModal()">
+        <div modal-header>
+            <h1>
+                Add new list
+            </h1>
+        </div>
+
+        <div modal-content>
+            <!--componente de formulario de card-->
+            <app-new-list-form (create)="onNewList($event)" #newListForm></app-new-list-form>
+         </div>
+       
+         <div modal-footer class="flex justify-end gap-3">
+             <button 
+               (click)="newListForm.resetForm(); onCloseCardModal()"             
+               class="px-4 py-2 cursor-pointer border border-gray-200 rounded-lg transition-colors text-[clamp(12px,2vw,16px)]"
+             >
+               Cancel
+             </button>
+             <button
+               (click)="newListForm.onSubmit()"             
+               class="px-4 py-2 cursor-pointer bg-blue-500 transition-colors text-white text-[clamp(12px,2vw,16px)] rounded-lg hover:bg-blue-600"
+             >
+               Save
+             </button>
+         </div>
     </app-modal>
 }
