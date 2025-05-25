@@ -20,6 +20,12 @@ export interface TrelloBoard {
   closed: boolean;
 }
 
+export interface TrelloList {
+  id: string;
+  name: string;
+  closed: boolean;
+}
+
 export interface TrelloCard {
   id: string;
   name: string;
@@ -47,6 +53,10 @@ export class TrelloAuthService {
   // Estado del usuario
   private userSubject = new BehaviorSubject<TrelloUser | null>(null);
   public user$ = this.userSubject.asObservable();
+
+  // tablero seleccionado
+  public selectedBoardIDSubject = new BehaviorSubject<string | null>(null);
+  public selectedBoardID$ = this.selectedBoardIDSubject.asObservable();
 
   private redirectFlag: string | null = null;
 
@@ -103,7 +113,7 @@ export class TrelloAuthService {
   loginWithTrello(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const scope = 'read,write,account,offline_access'; // Permisos necesarios
+    const scope = 'read,write,account'; // Permisos necesarios
     const expiration = '30days'; // Duración del token
     const returnUrl = encodeURIComponent(window.location.origin + '/callback'); // url de redireccion para verificacion de token de usuario
     
@@ -129,7 +139,7 @@ export class TrelloAuthService {
     // El token puede venir en query params o hash
     const token = urlParams.get('token') || hashParams.get('token');
     
-    if (token) {
+    if (token) {      
       this.setTrelloToken(token);
       // Limpiar URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -172,6 +182,38 @@ export class TrelloAuthService {
     };
 
     return this.http.get<TrelloBoard[]>(url, { params });
+  }
+
+  // Obtener listas de un tablero específico
+  getBoardLists(boardId: string): Observable<any[]> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+    const url = `${this.TRELLO_API_BASE}/boards/${boardId}/lists`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      fields: 'id,name,closed'
+    };
+    return this.http.get<any[]>(url, { params });
+  }
+
+  // on=bterner tarjetas de una lista específica
+  getListCards(listId: string): Observable<TrelloCard[]> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+
+    const url = `${this.TRELLO_API_BASE}/lists/${listId}/cards`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      fields: 'id,name,desc,url,idBoard,idList,closed'
+    };
+
+    return this.http.get<TrelloCard[]>(url, { params });
   }
 
   // Obtener tarjetas de un tablero específico
