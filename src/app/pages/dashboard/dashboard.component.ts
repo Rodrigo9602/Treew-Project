@@ -11,6 +11,11 @@ import { EditListFormComponent } from '../../components/forms/edit-list-form/edi
 import { NewBoardFormComponent } from '../../components/forms/new-board-form/new-board-form.component';
 
 
+interface SelectOptions {
+  label:string,
+  value: string,
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [ListComponent, ModalComponent, CardFormComponent, NewListFormComponent, ListOrderFormComponent, EditListFormComponent, NewBoardFormComponent],
@@ -28,6 +33,7 @@ export class DashboardComponent implements OnInit {
   public selectedListOrder: number = 0;
   public modalEditListOpen: boolean = false;
   public createNewBoardModal: boolean = false;
+  public listOptions:SelectOptions[] = [];
 
   constructor(private trelloService: TrelloAuthService, private globalService: GlobalVariablesService, private toast: ToastService) { }
 
@@ -37,11 +43,16 @@ export class DashboardComponent implements OnInit {
       // obtener listas para el tablero seleccionado
       if(boardID) {
         this.selectedBoard = boardID;
-        this.trelloService.getBoardLists(boardID).subscribe((response: any) => {          
-          this.boardLists = response;             
-        });
+        this.getBoardLists(boardID);
       }    
     }); 
+    // suscribirse al observable de listas
+    this.globalService.archivedList$.subscribe((archived) => {
+      if(archived) {
+        // si se ha archivado una lista, obtener las listas nuevamente
+        this.getBoardLists(this.selectedBoard!);
+      }
+    });
     // suscribirse al observable de cards
     this.globalService.selectedCard$.subscribe((card)=> {
       if(card) {
@@ -49,6 +60,25 @@ export class DashboardComponent implements OnInit {
       }
     })
   }  
+
+  private getBoardLists(boardID: string) {
+    // obtener las listas del tablero seleccionado
+    this.trelloService.getBoardLists(boardID).subscribe((response: any) => {          
+      this.boardLists = response;
+      // limpiar el array de opciones
+      this.listOptions = [];
+      this.getOptionsForList();
+    });
+  }
+
+  private getOptionsForList() {
+    this.boardLists.forEach((list)=> {      
+      this.listOptions.push({
+        label: list.name,
+        value: list.id
+      });
+    });    
+  }
 
   private sortListsByPosition() {
     this.boardLists.sort((a, b) => a.pos - b.pos);
@@ -70,13 +100,13 @@ export class DashboardComponent implements OnInit {
   
 
   cardUpdatedEvent():void {
+    // cerrar el modal
+    this.onCloseCardModal();
     // mostrar notificacion y posteriormente cerrar el modal
     this.toast.success(
       'Card Updated',
       'The card was successfully updated'
-    );
-
-    this.onCloseCardModal();
+    );   
   }
 
   onAddNewList():void {
@@ -84,15 +114,16 @@ export class DashboardComponent implements OnInit {
   }
 
   onNewList(event:string):void {
+    // cerrar el modal
+    this.onCloseNewListModal();
+    // crear la nueva lista
     this.trelloService.createList(event, this.selectedBoard!).subscribe((newList) => {
       this.boardLists.push(newList);
       // notificar acerca de la creaciónd de nueva lista
       this.toast.success(
         'New list added',
         'The new list was successfully created'
-      )
-      // cerrar el modal
-      this.onCloseNewListModal()
+      )      
     });
   }
 
@@ -125,6 +156,9 @@ export class DashboardComponent implements OnInit {
   }
 
   handleReorder(newOrder: number) {
+    // cerrar el modal
+    this.onCloseMoveListModal();
+
     const newPos = this.calculateNewListPosition(Number(newOrder));
   
     this.trelloService.updateListOrder({
@@ -141,9 +175,7 @@ export class DashboardComponent implements OnInit {
         console.error('Error moving list:', err);
         this.toast.danger('Error moving list', err.message)
       }
-    });
-  
-    this.onCloseMoveListModal();
+    });  
   }
   
 
@@ -174,6 +206,8 @@ export class DashboardComponent implements OnInit {
     this.trelloService.createBoard(event).subscribe({
       next: () => {
         this.trelloService.newBoardSubject.next(true);
+        this.createNewBoardModal = false;
+        this.toast.success('Board created successfully', 'The new board was created successfully');
       },
       error: (err) => {
         console.error('Error creating board:', err);

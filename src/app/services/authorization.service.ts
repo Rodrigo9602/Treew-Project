@@ -292,11 +292,16 @@ export class TrelloAuthService {
   // Obtener token de cookies en servidor
   private getTokenFromServerCookies(): string | null {
     try {
-      const cookieString = this.document.cookie || '';
+      // En SSR, document.cookie puede no estar implementado completamente
+      if (!this.document || !this.document.cookie) {
+        return null;
+      }
+      
+      const cookieString = this.document.cookie;
       const cookies = this.parseCookies(cookieString);
       return cookies['trello-token'] || null;
     } catch (error) {
-      console.warn('Error reading server cookies:', error);
+      // Silenciar errores de SSR - el token se manejará en el cliente
       return null;
     }
   }
@@ -420,8 +425,7 @@ export class TrelloAuthService {
     const url = `${this.TRELLO_API_BASE}/lists/${listId}/cards`;
 
     // Campos básicos
-    let fields =
-      'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
+    let fields = 'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName,labels';
 
     // Parámetros básicos
     const params: any = {
@@ -437,8 +441,8 @@ export class TrelloAuthService {
       params.checklists = 'all';
       params.checklist_fields = 'id,name,pos';
       params.checkItemStates = 'true';
-      params.labels = 'true';
-      params.label_fields = 'id,name,color';
+      params.labels = 'all';
+      params.label_fields = 'id,name,color,uses';
       params.customFieldItems = 'true';
       params.attachments = 'true';
       params.attachment_fields = 'id,name,url,bytes,date,isUpload,mimeType';
@@ -461,8 +465,7 @@ export class TrelloAuthService {
 
     const url = `${this.TRELLO_API_BASE}/boards/${boardId}/cards`;
 
-    let fields =
-      'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName';
+    let fields = 'id,name,desc,url,idBoard,idList,closed,due,dueComplete,dueReminder,start,pos,dateLastActivity,subscribed,isTemplate,cardRole,address,locationName,labels';
 
     const params: any = {
       key: this.TRELLO_API_KEY,
@@ -476,7 +479,8 @@ export class TrelloAuthService {
       params.checklists = 'all';
       params.checklist_fields = 'id,name,pos';
       params.checkItemStates = 'true';
-      params.labels = 'true';
+      params.labels = 'all';
+      params.label_fields = 'id,name,color,uses';
       params.customFieldItems = 'true';
       params.attachments = 'true';
       params.attachment_fields = 'id,name,url,bytes,date,isUpload,mimeType';
@@ -504,7 +508,8 @@ export class TrelloAuthService {
       checklists: 'all',
       checklist_fields: 'all',
       checkItemStates: 'true',
-      labels: 'true',
+      labels:'all',
+      label_fields: 'id,name,color,uses',
       customFieldItems: 'true',
       attachments: 'true',
       attachment_fields: 'all',
@@ -851,6 +856,26 @@ export class TrelloAuthService {
     });
 
     return forkJoin(requests);
+  }
+
+  // cambiar tarjeta de lista
+  moveCardToList(
+    cardId: string,
+    newListId: string
+  ): Observable<TrelloCard> {
+    const token = this.getTrelloToken();
+    if (!token) {
+      throw new Error('No Trello token available');
+    }
+
+    const url = `${this.TRELLO_API_BASE}/cards/${cardId}`;
+    const params = {
+      key: this.TRELLO_API_KEY,
+      token: token,
+      idList: newListId,
+    };
+
+    return this.http.put<TrelloCard>(url, null, { params });
   }
 
   // modificar posicion de una lista dentro de un tablero

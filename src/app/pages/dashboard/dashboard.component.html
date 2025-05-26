@@ -33,13 +33,7 @@
                 <h1 class="text-2xl font-bold text-slate-800">Project Board</h1>
                 <p class="text-slate-600 mt-1">Manage your tasks and workflow</p>
             </div>
-            <div class="w-full md:w-auto flex items-center justify-center gap-3">
-                <button class="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                    </svg>
-                    Filter
-                </button>
+            <div class="w-full md:w-auto flex items-center justify-center gap-3">               
                 <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" (click)="onAddNewList()">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -88,7 +82,7 @@
       
         <div modal-content>
            <!--componente de formulario de card-->
-           <app-card-form (onCardUpdated)="cardUpdatedEvent()" #cardForm></app-card-form>
+           <app-card-form [listOptions]="listOptions" (onCardUpdated)="cardUpdatedEvent()" #cardForm></app-card-form>
         </div>
       
         <div modal-footer class="flex justify-end gap-3">
