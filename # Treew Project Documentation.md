@@ -124,6 +124,68 @@ ng test --watch
 
 This will start Karma test runner in watch mode, automatically re-running tests when files change.
 
+# Environment Configuration
+
+The project uses Angular's environment configuration system to manage different settings across environments (development, production, etc).
+
+## Environment Files
+
+Environment files are located in the `src/environments/` directory. The main file structure is:
+
+```typescript
+// src/environments/environment.ts
+export const environment = {
+  production: false,
+  openaiKey: 'your-openai-api-key'
+};
+```
+
+## Available Configurations
+
+Current environment variables include:
+
+- `production`: Boolean flag indicating if it's a production build
+- `openaiKey`: API key for OpenAI services
+
+## Setting Up Environment Variables
+
+1. Create environment files for different environments:
+
+```typescript
+// environment.ts (development)
+export const environment = {
+  production: false,
+  openaiKey: 'your-dev-key'
+};
+
+// environment.prod.ts (production)
+export const environment = {
+  production: true,
+  openaiKey: 'your-prod-key'
+};
+```
+
+2. Use environment variables in your components/services:
+
+```typescript
+import { environment } from '../environments/environment';
+
+@Injectable()
+export class MyService {
+  constructor() {
+    // Access environment variables
+    const isProd = environment.production;
+    const apiKey = environment.openaiKey;
+  }
+}
+```
+
+## Security Considerations
+
+- Never commit sensitive API keys to version control
+- Use `.gitignore` to exclude environment files containing sensitive data
+- Consider using environment variables during deployment
+
 ## License
 MIT License
 
