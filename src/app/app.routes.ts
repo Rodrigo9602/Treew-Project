@@ -29,9 +29,14 @@ export const routes: Routes = [
           }
         },
         canActivate: [authHybridGuard]
+      },
+      {
+        path: 'ainalysis',
+        loadComponent: () => import('./pages/ainalysis/ainalysis.component').then((m) => m.AinalysisComponent),
+        canActivate: [authHybridGuard]
       }      
     ]
-  },
+  },  
   {
     path: 'callback',
     loadComponent: () => import('./pages/callback/callback.component').then((m) => m.CallbackComponent)   

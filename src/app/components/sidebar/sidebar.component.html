@@ -1,6 +1,6 @@
 <!-- Desktop Sidebar -->
 <section class="hidden md:block w-full h-full bg-white border-r border-slate-200 shadow-sm">
-   <div class="h-full flex flex-col">
+   <div class="h-full flex flex-col items-center">
      <!-- Header -->
      <div class="p-6 border-b border-slate-100">
        <div class="flex items-center gap-3">
@@ -14,7 +14,7 @@
      </div>
  
      <!-- Boards List -->
-     <div class="flex-1 overflow-y-auto p-4">
+     <div class="w-full flex-1 overflow-y-auto p-4">
        <div class="space-y-2">
          @for (item of sideItems; track item.id) {
           <div class="w-full mb-2">
@@ -34,6 +34,22 @@
          }
        </div>
      </div>
+
+     <!--chatGPT section-->
+     <div class="w-[90%] border border-gray-300 bg-slate-50 rounded-lg p-4 mb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span class="text-sm font-semibold text-slate-800">ChatGPT</span>
+        </div>
+        <p class="text-sm text-slate-600">Get real time analysis of your board, recomendations and more...</p>
+        <div class="w-full flex items-center justify-center mt-4">
+          <button class="mt-2 px-4 py-2 bg-blue-500 text-white font-poppins cursor-pointer text-sm rounded-lg hover:bg-blue-600 transition-colors duration-200" [routerLink]="['/ainalysis']">
+            Go to Analysis
+          </button>
+        </div>        
+     </div>
  
      <!-- Footer -->
      <div class="p-4 border-t border-slate-100">
@@ -50,7 +66,7 @@
  <!-- Mobile Sidebar -->
  <section class="md:hidden fixed top-12 left-0 h-screen bg-white border-r border-slate-200 transform transition-all duration-300 ease-in-out z-50"
           [ngClass]="isOpen ? 'translate-x-0 w-2/3' : '-translate-x-full w-0'">   
-   <div class="h-full flex flex-col" [ngClass]="{'opacity-100': isOpen, 'opacity-0': !isOpen}">
+   <div class="h-full flex flex-col items-center" [ngClass]="{'opacity-100': isOpen, 'opacity-0': !isOpen}">
      <!-- Mobile Header -->
      <div class="p-6 border-b border-slate-100 flex items-center justify-between">
        <div class="flex items-center gap-3">
@@ -64,7 +80,7 @@
      </div>
  
      <!-- Mobile Boards List -->
-     <div class="flex-1 overflow-y-auto p-4">
+     <div class="w-full flex-1 overflow-y-auto p-4">
        <div class="space-y-2">
          @for (item of sideItems; track item.id) {
           <div class="w-full mb-2">
@@ -82,6 +98,22 @@
            </div>
          }
        </div>
+     </div>
+
+      <!--chatGPT section-->
+      <div class="w-[90%] border border-gray-300 bg-slate-50 rounded-lg p-4 relative bottom-15 z-40">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span class="text-[12px] font-semibold text-slate-800">ChatGPT</span>
+        </div>
+        <p class="text-[12px] text-slate-600">Get real time analysis of your board, recomendations and more...</p>
+        <div class="w-full flex items-center justify-center mt-4">
+          <button class="mt-2 px-4 py-2 bg-blue-500 text-white font-poppins cursor-pointer text-[12px] rounded-lg hover:bg-blue-600 transition-colors duration-200" [routerLink]="['/ainalysis']">
+            Go to Analysis
+          </button>
+        </div>        
      </div>
  
      <!-- Mobile Footer -->

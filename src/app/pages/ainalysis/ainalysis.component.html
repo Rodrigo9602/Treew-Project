@@ -1,0 +1,36 @@
+@if(boardId === '') {
+  <div class="p-4">
+    <div class="text-red-500">You have not selected a board yet.</div>
+    <div class="mt-2">
+      <p class="text-gray-500">Please select a board on sidemenu in order to start the analysis</p>
+    </div>
+  </div>
+}@else {
+  <div class="p-4">
+    <header class="flex flex flex-col md:flex-row items-center justify-between mb-4">
+      <div class="flex flex-col items-start jsutify-center">
+        <h1 class="font-bold">Selected Board</h1>
+        <p class="text-gray-500 text-base">{{boardName}}</p>
+        @if(boardDescription !== '') {
+          <p class="text-gray-500 text-[clamp(10px,2vw,14px)]">{{boardDescription}}</p>
+        }
+      </div> 
+      <button class="w-full max-w-[300px] md:w-auto cursor-pointer px-4 py-3 rounded-lg text-white font-poppins transition-colors bg-blue-500 hover:bg-blue-700 mt-2 md:mt-0" (click)="runAnalysis()">
+        Run anaylisis
+      </button>    
+    </header>
+    @if(loading) {
+      <div class="mt-4 text-yellow-600">Analizando...</div>
+    }
+    @if(error) {
+      <div class="mt-4 text-red-500">{{ error }}</div>
+    }
+    @if(result) {
+      <pre  class="mt-4 bg-gray-100 p-4 rounded whitespace-pre-wrap"
+      >{{ result }}</pre>
+    }
+  </div>
+}
+
+
+

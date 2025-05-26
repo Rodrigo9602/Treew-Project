@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { SidebarService } from '../../services/components/sidebar.service';
 import { SideItemComponent } from './side-item/side-item.component';
 import { TrelloAuthService } from '../../services/authorization.service';
@@ -15,7 +16,7 @@ export interface SideItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [CommonModule, SideItemComponent, ModalComponent, NewBoardFormComponent],
+  imports: [CommonModule, RouterModule, SideItemComponent, ModalComponent, NewBoardFormComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })

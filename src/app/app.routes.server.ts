@@ -12,7 +12,11 @@ export const serverRoutes: ServerRoute[] = [
   {
     path: 'dashboard',
     renderMode: RenderMode.Client 
-  },  
+  }, 
+  {
+    path: 'ainalysis',
+    renderMode: RenderMode.Client
+  }, 
   {
     path: '**',
     renderMode: RenderMode.Prerender
