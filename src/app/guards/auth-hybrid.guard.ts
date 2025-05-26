@@ -4,6 +4,35 @@ import { isPlatformServer, isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 import { TrelloAuthService } from '../services/authorization.service';
 
+/**
+ * Guard de autenticación híbrido para aplicaciones con Server-Side Rendering (SSR).
+ * Maneja la autenticación tanto en el servidor como en el cliente, evitando
+ * problemas de hidratación y proporcionando una experiencia fluida.
+ * 
+ * **Comportamiento en servidor:**
+ * - Valida usando cookies/sessiones si están disponibles
+ * - No redirige directamente, sino que marca flags para el cliente
+ * - Siempre permite el renderizado para evitar problemas de hidratación
+ * 
+ * **Comportamiento en cliente:**
+ * - Verifica flags de redirección del servidor
+ * - Realiza validación completa de autenticación
+ * - Maneja redirecciones reales al login
+ * 
+ * @param route - Ruta que se está intentando activar
+ * @param state - Estado actual del router
+ * @returns `true` para permitir acceso, `false` para redirigir
+ * 
+ * @example
+ * ```typescript
+ * // En app.routes.ts para aplicaciones SSR
+ * {
+ *   path: 'protected',
+ *   component: ProtectedComponent,
+ *   canActivate: [authHybridGuard]
+ * }
+ * ```
+ */
 export const authHybridGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);

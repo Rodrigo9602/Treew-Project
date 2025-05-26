@@ -10,12 +10,15 @@ import { ListOrderFormComponent } from '../../components/forms/list-order-form/l
 import { EditListFormComponent } from '../../components/forms/edit-list-form/edit-list-form.component';
 import { NewBoardFormComponent } from '../../components/forms/new-board-form/new-board-form.component';
 
-
 interface SelectOptions {
   label:string,
   value: string,
 }
 
+/**
+ * Componente principal del dashboard que gestiona tableros, listas y tarjetas de Trello.
+ * Proporciona funcionalidades para crear, editar, mover y gestionar elementos del tablero.
+ */
 @Component({
   selector: 'app-dashboard',
   imports: [ListComponent, ModalComponent, CardFormComponent, NewListFormComponent, ListOrderFormComponent, EditListFormComponent, NewBoardFormComponent],
@@ -37,6 +40,10 @@ export class DashboardComponent implements OnInit {
 
   constructor(private trelloService: TrelloAuthService, private globalService: GlobalVariablesService, private toast: ToastService) { }
 
+  /**
+   * Inicializa el componente y configura las suscripciones a los observables
+   * para gestionar cambios en tableros, listas archivadas y tarjetas seleccionadas.
+   */
   ngOnInit(): void {
     // obtener el tablero seleccionado
     this.globalService.selectedBoardID$.subscribe((boardID) => {
@@ -61,6 +68,12 @@ export class DashboardComponent implements OnInit {
     })
   }  
 
+  /**
+   * Obtiene todas las listas de un tablero específico desde la API de Trello.
+   * Actualiza las opciones de listas disponibles para selección.
+   * @private
+   * @param boardID - ID del tablero del cual obtener las listas
+   */
   private getBoardLists(boardID: string) {
     // obtener las listas del tablero seleccionado
     this.trelloService.getBoardLists(boardID).subscribe((response: any) => {          
@@ -71,6 +84,11 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Convierte las listas del tablero en opciones de selección para formularios.
+   * Genera un array de objetos con etiqueta y valor para cada lista.
+   * @private
+   */
   private getOptionsForList() {
     this.boardLists.forEach((list)=> {      
       this.listOptions.push({
@@ -80,46 +98,57 @@ export class DashboardComponent implements OnInit {
     });    
   }
 
+  /**
+   * Ordena las listas del tablero según su posición numérica.
+   * @private
+   */
   private sortListsByPosition() {
     this.boardLists.sort((a, b) => a.pos - b.pos);
   }  
 
- 
-private calculateNewListPosition(   
-  newIndex: number
-): number {
-  // 1) Ordenar copias por pos
-  const sorted = [...this.boardLists].sort((a, b) => a.pos - b.pos);
+  /**
+   * Calcula la nueva posición numérica para una lista que se está moviendo a un índice específico.
+   * Utiliza un algoritmo de posicionamiento que evita conflictos y mantiene el orden.
+   * @private
+   * @param newIndex - Nuevo índice de posición donde se colocará la lista
+   * @returns La nueva posición numérica calculada para la lista
+   * @throws Error si no se encuentra la lista seleccionada
+   */
+  private calculateNewListPosition(newIndex: number): number {
+    // 1) Ordenar copias por pos
+    const sorted = [...this.boardLists].sort((a, b) => a.pos - b.pos);
 
-  // 2) Extraer la lista que movemos
-  const currentIdx = sorted.findIndex(l => l.id === this.selectedList?.id);
-  if (currentIdx === -1) {
-    throw new Error(`Lista con id ${this.selectedList?.id} no encontrada`);
+    // 2) Extraer la lista que movemos
+    const currentIdx = sorted.findIndex(l => l.id === this.selectedList?.id);
+    if (currentIdx === -1) {
+      throw new Error(`Lista con id ${this.selectedList?.id} no encontrada`);
+    }
+    const [moving] = sorted.splice(currentIdx, 1);
+
+    // 3) Clamp newIndex y re-insertar
+    const idx = Math.max(0, Math.min(newIndex, sorted.length));
+    sorted.splice(idx, 0, moving);
+
+    // 4) Si está al principio o al final, manejamos extremos:
+    if (idx === 0) {
+      // mitad de la siguiente
+      return sorted[1].pos / 2;
+    }
+    if (idx === sorted.length - 1) {
+      // un paso (p.ej. +1000) tras la anterior
+      return sorted[sorted.length - 2].pos + 1000;
+    }
+
+    // 5) Caso intermedio: promedio entre prev y next
+    const prevPos = sorted[idx - 1].pos;
+    const nextPos = sorted[idx + 1].pos;
+    return (prevPos + nextPos) / 2;
   }
-  const [moving] = sorted.splice(currentIdx, 1);
 
-  // 3) Clamp newIndex y re-insertar
-  const idx = Math.max(0, Math.min(newIndex, sorted.length));
-  sorted.splice(idx, 0, moving);
-
-  // 4) Si está al principio o al final, manejamos extremos:
-  if (idx === 0) {
-    // mitad de la siguiente
-    return sorted[1].pos / 2;
-  }
-  if (idx === sorted.length - 1) {
-    // un paso (p.ej. +1000) tras la anterior
-    return sorted[sorted.length - 2].pos + 1000;
-  }
-
-  // 5) Caso intermedio: promedio entre prev y next
-  const prevPos = sorted[idx - 1].pos;
-  const nextPos = sorted[idx + 1].pos;
-  return (prevPos + nextPos) / 2;
-}
-
-  
-
+  /**
+   * Maneja el evento de actualización de una tarjeta.
+   * Cierra el modal de tarjeta y muestra una notificación de éxito.
+   */
   cardUpdatedEvent():void {
     // cerrar el modal
     this.onCloseCardModal();
@@ -130,10 +159,18 @@ private calculateNewListPosition(
     );   
   }
 
+  /**
+   * Abre el modal para crear una nueva lista.
+   */
   onAddNewList():void {
     this.openNewListModal = true;
   }
 
+  /**
+   * Crea una nueva lista en el tablero actual.
+   * Cierra el modal de nueva lista y actualiza la lista de listas disponibles.
+   * @param event - Nombre de la nueva lista a crear
+   */
   onNewList(event:string):void {
     // cerrar el modal
     this.onCloseNewListModal();
@@ -148,11 +185,21 @@ private calculateNewListPosition(
     });
   }
 
+  /**
+   * Prepara la edición de una lista existente.
+   * Establece la lista seleccionada y abre el modal de edición.
+   * @param event - Lista que se desea editar
+   */
   onEditList(event: TrelloList) {    
     this.selectedList = event;
     this.modalEditListOpen = true;
   }
 
+  /**
+   * Procesa la edición de una lista existente.
+   * Actualiza el nombre de la lista y sincroniza los cambios con el servidor.
+   * @param event - Nuevo nombre para la lista
+   */
   onListEdited(event: string) {
     // cerrar el modal
     this.onCloseEditListModal();
@@ -170,12 +217,22 @@ private calculateNewListPosition(
     });
   }
 
+  /**
+   * Prepara el movimiento de una lista a una nueva posición.
+   * Establece la lista seleccionada, calcula su orden actual y abre el modal de reordenamiento.
+   * @param event - Lista que se desea mover
+   */
   onMoveList(event: TrelloList) {    
     this.selectedList = event;
     this.selectedListOrder = this.boardLists.findIndex((list) => list.id === event.id) + 1;    
     this.moveListModalOpen = true;
   }
 
+  /**
+   * Ejecuta el reordenamiento de una lista a una nueva posición.
+   * Calcula la nueva posición numérica y actualiza el orden en el servidor.
+   * @param newOrder - Nueva posición ordinal (1-based) donde colocar la lista
+   */
   handleReorder(newOrder: number) {
     // cerrar el modal
     this.onCloseMoveListModal();
@@ -199,30 +256,52 @@ private calculateNewListPosition(
     });  
   }
   
-
+  /**
+   * Cierra el modal de visualización/edición de tarjetas.
+   * Limpia la selección de tarjeta actual en el servicio global.
+   */
   onCloseCardModal(): void {
     this.openCardModal = false; 
     this.globalService.selectedCardSubject.next(null);   
   } 
 
+  /**
+   * Cierra el modal de creación de nueva lista.
+   */
   onCloseNewListModal(): void {
     this.openNewListModal = false;
   }
 
+  /**
+   * Cierra el modal de movimiento/reordenamiento de listas.
+   * Limpia la selección de lista actual en el servicio global.
+   */
   onCloseMoveListModal():void {
     this.moveListModalOpen = false;
     this.globalService.selectedListSubject.next(null);
   }
 
+  /**
+   * Cierra el modal de edición de listas.
+   * Limpia la selección de lista actual en el servicio global.
+   */
   onCloseEditListModal(): void {
     this.modalEditListOpen = false;
     this.globalService.selectedListSubject.next(null);
   }
 
+  /**
+   * Abre el modal para crear un nuevo tablero.
+   */
   createNewBoard(): void {
     this.createNewBoardModal = true;
   } 
 
+  /**
+   * Crea un nuevo tablero con el nombre especificado.
+   * Notifica a otros componentes sobre la creación y cierra el modal.
+   * @param event - Nombre del nuevo tablero a crear
+   */
   onCreateNewBoard(event: string) {
     this.trelloService.createBoard(event).subscribe({
       next: () => {
