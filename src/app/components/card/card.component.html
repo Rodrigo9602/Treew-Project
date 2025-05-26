@@ -10,7 +10,7 @@
       <div class="flex items-center gap-3 mt-2">
         <!-- Priority indicator (example) -->
         <div class="flex items-center gap-1">
-          <div class="w-2 h-2 rounded-full" [ngClass]="priority === 'high' ? 'bg-red-500' : priority === 'medium' ? 'bg-yellow' : 'bg-blue-500'"></div>
+          <div class="w-2 h-2 rounded-full" [ngClass]="priority === 'high' ? 'bg-red-500' : priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'"></div>
           <span class="text-xs text-slate-500">{{priority}}</span>
         </div>
         
@@ -38,10 +38,14 @@
   </div>
 
   <!-- Tags/Labels -->
-  <div class="flex flex-wrap gap-1 mt-3">
-    <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">Frontend</span>
-    <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">High Priority</span>
-  </div>
+   @if(card && card.labels !== undefined && card.labels.length > 0) {
+    <div class="flex flex-wrap gap-1 mt-3">
+      @for (label of card.labels; track $index) {        
+        <span class="px-2 py-1 text-xs rounded-full" [ngClass]="getLabelClasses(label.color!)">{{label.name}}</span>        
+      }
+    </div>
+   }
+  
 
   <!-- Progress bar if card has checklists-->
    @if(card && card.checklists !== undefined &&  card.checklists.length > 0) {
