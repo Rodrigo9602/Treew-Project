@@ -58,4 +58,9 @@ export class AinalysisComponent implements OnInit{
       }
     });
   }
+
+  clearResult() {
+    this.result = '';
+    this.error = '';
+  }
 }
