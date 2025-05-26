@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { AiAnalysisService } from '../../services/ai-analysis.service';
 import { GlobalVariablesService } from '../../services/global-variables.service';
 import { TrelloAuthService } from '../../services/authorization.service';
-import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-ainalysis',
-  imports: [FormsModule],
+  imports: [ RouterModule],
   templateUrl: './ainalysis.component.html',
   styleUrl: './ainalysis.component.scss'
 })
