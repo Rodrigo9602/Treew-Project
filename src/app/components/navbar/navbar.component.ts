@@ -13,6 +13,7 @@ import { TrelloAuthService } from '../../services/authorization.service';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit{
+  logoSrc = '/assets/images/logo.png';
   items: MenuItem[] | undefined;
   opened:boolean = false;
 

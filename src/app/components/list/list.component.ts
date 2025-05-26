@@ -44,7 +44,7 @@ export class ListComponent implements OnInit {
 
   private getListCards(listID: string):void {
     this.trelloService.getListCards(listID, true).subscribe((cards) => {              
-      this.cardsList = cards;
+      this.cardsList = cards;      
       this.originalCardsList = [...cards]; // Guardar copia del orden original
     });
   }
