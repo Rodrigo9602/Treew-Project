@@ -38,15 +38,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    loadComponent: () => {
-      // Verificar si estamos en el servidor usando una propiedad global
-      if (typeof window === 'undefined') {
-        // Estamos en el servidor
-        return import('./pages/error-ssr/error-ssr.component').then((m) => m.ErrorSsrComponent);
-      } else {
-        // Estamos en el cliente
-        return import('./pages/error/error.component').then((m) => m.ErrorComponent);
-      }
-    },
+    loadComponent: () => import('./pages/error/error.component').then((m) => m.ErrorComponent)
   }
 ];
