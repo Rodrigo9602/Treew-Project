@@ -51,6 +51,11 @@
     </button>
   </header>
 
+  @if(onAddNewCard) {
+    <!--Definimos un formulario pequeño con los campos name y desc correspondientes a la nueva card-->
+    <app-new-card (createCard)="handleCreateCard($event)" (abortAction)="onAddNewCard = false;"></app-new-card>
+  }
+
   <!-- Cards container -->
   <div 
   class="p-4 space-y-3 max-h-96 overflow-y-auto"
@@ -71,12 +76,7 @@
         <p class="text-sm">No cards yet</p>
         <p class="text-xs mt-1">Add a card to get started</p>
       </div>
-    }
-
-    @if(onAddNewCard) {
-      <!--Definimos un formulario pequeño con los campos name y desc correspondientes a la nueva card-->
-      <app-new-card (createCard)="handleCreateCard($event)" (abortAction)="onAddNewCard = false;"></app-new-card>
-    }
+    }    
   </div>
 
   <!-- Footer with card count -->

@@ -84,19 +84,40 @@ export class DashboardComponent implements OnInit {
     this.boardLists.sort((a, b) => a.pos - b.pos);
   }  
 
-  calculateNewListPosition(newIndex: number): number | 'top' | 'bottom' {    
-    const sortedLists = [...this.boardLists].sort((a, b) => a.pos - b.pos);
-    if (newIndex === 1) {      
-      return 'top'; // mueve al principio
-    }  
-    if (newIndex >= sortedLists.length) {
-      return 'bottom'; // mueve al final
-    }  
-    const before = sortedLists[newIndex - 1].pos;
-    const after = sortedLists[newIndex]?.pos;  
-    // Calcula un punto medio entre las dos listas vecinas
-    return (before + after) / 2 - 1;
+ 
+private calculateNewListPosition(   
+  newIndex: number
+): number {
+  // 1) Ordenar copias por pos
+  const sorted = [...this.boardLists].sort((a, b) => a.pos - b.pos);
+
+  // 2) Extraer la lista que movemos
+  const currentIdx = sorted.findIndex(l => l.id === this.selectedList?.id);
+  if (currentIdx === -1) {
+    throw new Error(`Lista con id ${this.selectedList?.id} no encontrada`);
   }
+  const [moving] = sorted.splice(currentIdx, 1);
+
+  // 3) Clamp newIndex y re-insertar
+  const idx = Math.max(0, Math.min(newIndex, sorted.length));
+  sorted.splice(idx, 0, moving);
+
+  // 4) Si está al principio o al final, manejamos extremos:
+  if (idx === 0) {
+    // mitad de la siguiente
+    return sorted[1].pos / 2;
+  }
+  if (idx === sorted.length - 1) {
+    // un paso (p.ej. +1000) tras la anterior
+    return sorted[sorted.length - 2].pos + 1000;
+  }
+
+  // 5) Caso intermedio: promedio entre prev y next
+  const prevPos = sorted[idx - 1].pos;
+  const nextPos = sorted[idx + 1].pos;
+  return (prevPos + nextPos) / 2;
+}
+
   
 
   cardUpdatedEvent():void {
@@ -159,7 +180,7 @@ export class DashboardComponent implements OnInit {
     // cerrar el modal
     this.onCloseMoveListModal();
 
-    const newPos = this.calculateNewListPosition(Number(newOrder));
+    const newPos = this.calculateNewListPosition(Number(newOrder)-1);
   
     this.trelloService.updateListOrder({
       id: this.selectedList?.id!,
