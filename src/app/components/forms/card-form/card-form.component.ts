@@ -1,9 +1,14 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Output, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { GlobalVariablesService } from '../../../services/global-variables.service';
 import { TrelloAuthService, TrelloCard } from '../../../services/authorization.service';
+
+export interface ListOption {
+  label: string;
+  value: string;
+}
 
 @Component({
   selector: 'app-card-form',
@@ -14,6 +19,8 @@ import { TrelloAuthService, TrelloCard } from '../../../services/authorization.s
 })
 export class CardFormComponent implements OnInit, OnDestroy {
   @Output() onCardUpdated = new EventEmitter<boolean>(false);
+  @Input() listOptions: ListOption[] = [];
+  
   cardForm: FormGroup;
   cardData: TrelloCard | null = null;
   isLoading = false;
@@ -56,7 +63,8 @@ export class CardFormComponent implements OnInit, OnDestroy {
       subscribed: [false],
       address: [''],
       locationName: [''],
-      pos: [0, [Validators.min(0)]]
+      pos: [0, [Validators.min(0)]],
+      idList: ['', [Validators.required]]
     });
   }
 
@@ -70,7 +78,8 @@ export class CardFormComponent implements OnInit, OnDestroy {
       subscribed: card.subscribed || false,
       address: card.address || '',
       locationName: card.locationName || '',
-      pos: card.pos || 0
+      pos: card.pos || 0,
+      idList: card.idList || ''
     });
   }
 
@@ -96,25 +105,63 @@ export class CardFormComponent implements OnInit, OnDestroy {
         desc: formValue.desc
       };
 
-      // Actualizar la tarjeta básica
-      this.trelloService.updateCard(this.cardData.id, updates)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updatedCard) => {
-            // Si hay cambios en la fecha de vencimiento, actualizarla por separado
-            if (this.shouldUpdateDueDate(formValue)) {
-              this.updateDueDate(updatedCard.id, formValue);
-            } else {
-              this.handleSuccess(updatedCard);
+      // Check if list needs to be changed
+      if (this.shouldUpdateList(formValue)) {
+        this.updateCardList(this.cardData.id, formValue.idList, updates, formValue);
+      } else {
+        // Actualizar la tarjeta básica
+        this.trelloService.updateCard(this.cardData.id, updates)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (updatedCard) => {
+              // Si hay cambios en la fecha de vencimiento, actualizarla por separado
+              if (this.shouldUpdateDueDate(formValue)) {
+                this.updateDueDate(updatedCard.id, formValue);
+              } else {
+                this.handleSuccess(updatedCard);
+              }
+            },
+            error: (error) => {
+              this.handleError(error);
             }
-          },
-          error: (error) => {
-            this.handleError(error);
-          }
-        });
+          });
+      }
     } else {
       this.markFormGroupTouched();
     }
+  }
+
+  private shouldUpdateList(formValue: any): boolean {
+    return this.cardData?.idList !== formValue.idList;
+  }
+
+  private updateCardList(cardId: string, newListId: string, updates: any, formValue: any): void {
+    this.trelloService.moveCardToList(cardId, newListId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (movedCard) => {          
+          // After moving, update the card details
+          this.trelloService.updateCard(cardId, updates)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (updatedCard) => {                            
+                if (this.shouldUpdateDueDate(formValue)) {
+                  this.updateDueDate(updatedCard.id, formValue);
+                } else {
+                  this.handleSuccess(updatedCard);
+                }
+                // notificar que se ha actualizado una tarjeta
+                this.globalService.cardChangedSubject.next(true);
+              },
+              error: (error) => {
+                this.handleError(error);
+              }
+            });
+        },
+        error: (error) => {
+          this.handleError(error);
+        }
+      });
   }
 
   private shouldUpdateDueDate(formValue: any): boolean {
@@ -143,8 +190,7 @@ export class CardFormComponent implements OnInit, OnDestroy {
   }
 
   private handleSuccess(updatedCard: TrelloCard): void {
-    this.isLoading = false;
-    console.log('Card updated successfully:', updatedCard);
+    this.isLoading = false;   
     // emitir un evento para el cierre del modal
     this.onCardUpdated.emit(true);
   }
@@ -171,6 +217,7 @@ export class CardFormComponent implements OnInit, OnDestroy {
   get addressControl() { return this.cardForm.get('address'); }
   get locationNameControl() { return this.cardForm.get('locationName'); }
   get posControl() { return this.cardForm.get('pos'); }
+  get idListControl() { return this.cardForm.get('idList'); }
 
   // Método para resetear el formulario
   resetForm(): void {
