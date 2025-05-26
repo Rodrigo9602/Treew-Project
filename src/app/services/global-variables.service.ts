@@ -18,5 +18,13 @@ export class GlobalVariablesService {
   public selectedCardSubject = new BehaviorSubject<TrelloCard | null>(null);
   public selectedCard$ = this.selectedCardSubject.asObservable();
 
+  // cambios de lista por parte de tarjetas
+  public cardChangedSubject = new BehaviorSubject<boolean | null>(null);
+  public cardChanged$ = this.cardChangedSubject.asObservable();
+
+  // lista archivada
+  public archivedListSubject = new BehaviorSubject<boolean | null>(null);
+  public archivedList$ = this.archivedListSubject.asObservable();
+
   constructor() {}
 }
