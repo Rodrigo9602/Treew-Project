@@ -15,8 +15,8 @@
         Cerrar Sesión
     </button>
 
-    <section class="flex mt-1 md:hidden">
-        <button class="w-12 flex flex-col items-end px-3 justify-center gap-1 cursor-pointer md:hidden" (click)="onSideBarOpen()"> 
+    <section class=" h-full flex mt-1 md:hidden px-4" >
+        <button class="w-12  flex flex-col items-end px-3 justify-center gap-1 cursor-pointer md:hidden" (click)="onSideBarOpen()"> 
             <div class="w-full h-[2px] bg-black transition-transform rounded-full" [ngClass]="opened ? 'rotate-[45deg] translate-y-1': 'rotate-0'"></div>
             <div class="w-[70%] h-[2px] bg-black transition-opacity rounded-full" [ngClass]="opened ? 'opacity-0': 'opacity-100'"></div>
             <div class="w-[50%] h-[2px] bg-black transition-transform rounded-full" [ngClass]="opened ? 'w-full rotate-[-45deg] translate-y-[-0.5rem]': 'w-[50%] rotate-0'"></div>
