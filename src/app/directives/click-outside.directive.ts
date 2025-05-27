@@ -40,7 +40,7 @@ import { Directive, ElementRef, HostListener, Output, EventEmitter } from '@angu
  * - Es compatible con elementos anidados
  * 
  * @since 1.0.0
- * @author [Nombre del desarrollador]
+ * @author [Rodrigo Antonio Fernandez Gonzalez]
  */
 @Directive({
   selector: '[clickOutside]'

@@ -45,7 +45,7 @@ import { GlobalVariablesService } from '../../services/global-variables.service'
  * - El mapeo de colores utiliza un objeto estático para optimizar las consultas
  * 
  * @since 1.0.0
- * @author [Nombre del desarrollador]
+ * @author [Rodrigo Antonio Fernandez Gonzalez]
  */
 @Component({
   selector: 'app-card',

@@ -65,7 +65,7 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
  * - Gestiona suscripciones reactivas para actualizaciones en tiempo real
  * 
  * @since 1.0.0
- * @author [Nombre del desarrollador]
+ * @author [Rodrigo Antonio Fernandez Gonzalez]
  */
 @Component({
   selector: 'app-list',
