@@ -19,20 +19,42 @@
               <ul class="text-sm text-slate-700">
                 <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="editList()">Edit list</li>  
                 <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="moveList()">Move list</li>     
-                <!-- Submenú -->
-                <li class="relative group px-4 py-2 hover:bg-slate-100 cursor-pointer">
-                  Order by...
-                  <div
-                    class="absolute left-full top-0 ml-1 w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-20 hidden group-hover:block"
-                  >
-                    <ul class="text-sm text-slate-700">
-                      <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('creationDesc')">Creation date (more recent)</li>
-                      <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('creationAsc')">Creation date (more old)</li>
-                      <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('alphabetical')">Alphabetic order</li>
-                      <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('dueDate')">Due date</li>
-                    </ul>
+                
+                <!-- Submenú mejorado -->
+                <li class="relative px-4 py-2 hover:bg-slate-100 cursor-pointer" 
+                    (mouseenter)="showSubmenu = true" 
+                    (mouseleave)="hideSubmenuWithDelay()" (click)="showSubmenu = !showSubmenu">
+                  <div class="flex items-center justify-between">
+                    <span>Order by...</span>
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
                   </div>
+                  
+                  <!-- Submenú con posicionamiento responsivo y mejor usabilidad -->
+                  @if(showSubmenu) {
+                    <div class="absolute top-0 mt-0 w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-20 
+                                right-full -mr-34 md:left-full md:ml-1 md:right-auto"
+                         (mouseenter)="cancelHideSubmenu()" 
+                         (mouseleave)="hideSubmenuWithDelay()">
+                      <ul class="text-sm text-slate-700">
+                        <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('creationDesc')">
+                          Creation date (more recent)
+                        </li>
+                        <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('creationAsc')">
+                          Creation date (more old)
+                        </li>
+                        <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('alphabetical')">
+                          Alphabetic order
+                        </li>
+                        <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="sortBy('dueDate')">
+                          Due date
+                        </li>
+                      </ul>
+                    </div>
+                  }
                 </li>
+                
                 <li class="px-4 py-2 hover:bg-slate-100 cursor-pointer" (click)="archiveList()">File list</li>
               </ul>
             </div>
